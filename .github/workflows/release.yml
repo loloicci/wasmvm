@@ -14,7 +14,8 @@ jobs:
     name: Get Package Version
     runs-on: ubuntu-latest
     outputs:
-      version: ${{ steps.get-version.outputs.version }}
+      package-version: ${{ steps.get-package-version.outputs.version }}
+      latest-tag: ${{ steps.get-latest-tag.outputs.tag }}
     steps:
       - name: Install Rust
         uses: actions-rs/toolchain@v1
@@ -25,10 +26,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Get latest tag
-        id: get_latest_tag
+        id: get-latest-tag
         uses: actions-ecosystem/action-get-latest-tag@v1
       - name: Get package version
-        id: get_package_version
+        id: get-package-version
         working-directory: ./libwasmvm
         run: |
           VERSION=$(cargo tree -i wasmvm | grep -oE "[0-9]+(\.[0-9]+){2}-[0-9]+(\.[0-9]+){2}")
@@ -37,13 +38,13 @@ jobs:
     name: Push Tag
     needs:
       - get-version
-    #if: ${{ needs.get-version.outputs.version != needs.get-version.outputs.tag }}
+    #if: ${{ needs.get-version.outputs.package-version != needs.get-version.outputs.latest-tag }}
     runs-on: ubuntu-latest
     steps:
       - name: echo
-        run: echo ${{ needs.get-version.outputs.version }} ${{ needs.get-version.outputs.tag }}
+        run: echo ${{ needs.get-version.outputs.package-version }} ${{ needs.get-version.outputs.latest-tag }}
       - name: Push Tag to GitHub
         run: |
           curl -s -H "Authorization: token ${GITHUB_TOKEN}" \
-          -d "{\"ref\": \"refs/tags/${{ needs.get-version.outputs.version }}\", \"sha\": \"${GITHUB_SHA}\"}" \
+          -d "{\"ref\": \"refs/tags/${{ needs.get-version.outputs.package-version }}\", \"sha\": \"${GITHUB_SHA}\"}" \
           "https://api.github.com/repos/${GITHUB_REPOSITORY}/git/refs"
