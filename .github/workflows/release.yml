@@ -7,11 +7,11 @@ on:
       - hotfix**
 
 env:
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  GITHUB_SECRET_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   CARGO_HOME: /.cargo
 
 jobs:
-  package-version: # emit package version using `cargo tree -i`
+  get-version: # emit package version using `cargo tree -i`
     name: Get Package Version
     runs-on: ubuntu-latest
     container: rust:1.57.0-slim
@@ -30,7 +30,7 @@ jobs:
             ${{ env.CARGO_HOME }}/git/db/
           key: ${{ runner.os }}-cargo-home-${{ hashFiles('**/Cargo.lock') }}
       - name: Get package version
-        id: get_version
+        id: get_package_version
         working-directory: ./libwasmvm
         run: |
           VERSION=$(cargo tree -i wasmvm | grep -oE "[0-9]+(\.[0-9]+){2}-[0-9]+(\.[0-9]+){2}")
@@ -41,12 +41,12 @@ jobs:
   push-tag: # if the version does not exist as git tag, push it
     name: Push Tag
     needs:
-      - package-version
-    if: ${{ needs.package-version.outputs.version != needs.package-version.outputs.tag }}
+      - get-version
+    if: ${{ needs.get-version.outputs.version != needs.get-version.outputs.tag }}
     runs-on: ubuntu-latest
     steps:
       - name: Push Tag to GitHub
         run: |
-          curl -s -H "Authorization: token ${GITHUB_TOKEN}" \
+          curl -s -H "Authorization: token ${GITHUB_SECRET_TOKEN}" \
           -d "{\"ref\": \"refs/tags/${{ needs.get_version.outputs.version }}\", \"sha\": \"${GITHUB_SHA}\"}" \
           "https://api.github.com/repos/${GITHUB_REPOSITORY}/git/refs"
