@@ -41,9 +41,8 @@ jobs:
   push-tag: # if the version does not exist as git tag, push it
     name: Push Tag
     needs:
-      - get_version
-      - get_latest_tag
-    if: ${{ needs.get_version.outputs.version != needs.get_latest_tag.outputs.tag }}
+      - package-version
+    if: ${{ needs.package-version.outputs.version != needs.package-version.outputs.tag }}
     runs-on: ubuntu-latest
     steps:
       - name: Push Tag to GitHub
