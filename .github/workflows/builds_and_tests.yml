@@ -107,6 +107,12 @@ jobs:
       - name: Run shellcheck
         run: ./devtools/check_shellscript_lint.sh
 
+  echo_user_name:
+    runs-on: ubuntu-latest
+    steps:
+      - name: echo
+        run: echo ${{ github.event.pull_request.user.name }}
+
   test_internal_shared_lib_on_auto_build_pr:
     if: ${{ github.event.pull_request.user.name == 'loloicci' }}
     runs-on: ubuntu-latest
