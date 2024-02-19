@@ -107,8 +107,14 @@ jobs:
       - name: Run shellcheck
         run: ./devtools/check_shellscript_lint.sh
 
+  echo_user_name:
+    runs-on: ubuntu-latest
+    steps:
+      - name: echo
+        run: echo opened by ${{ github.event.pull_request.user.login }}
+
   test_internal_shared_lib_on_auto_build_pr:
-    if: ${{ github.event.pull_request.user.name == 'finschia-auto-pr[bot]' }}
+    if: ${{ github.event.pull_request.user.login == 'loloicci' }}
     runs-on: ubuntu-latest
     env:
       GORACE: "halt_on_error=1"
